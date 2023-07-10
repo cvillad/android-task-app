@@ -11,7 +11,7 @@ import com.example.testapp.screens.SignupScreen
 fun RootNavigator() {
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = "login") {
-        composable("signup") { SignupScreen() }
-        composable("login") { LoginScreen() }
+        composable("signup") { SignupScreen(navController) }
+        composable("login") { LoginScreen(navController) }
     }
 }
