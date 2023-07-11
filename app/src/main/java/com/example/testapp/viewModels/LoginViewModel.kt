@@ -4,6 +4,9 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.testapp.api.BackendService
+import com.example.testapp.models.ApiResponse
+import com.example.testapp.models.Auth
 import com.example.testapp.validations.ValidationEvent
 import com.example.testapp.validations.ValidationResult
 import com.example.testapp.validations.Validator
@@ -31,6 +34,15 @@ class LoginViewModel: ViewModel() {
 
     val validationEvent = MutableSharedFlow<ValidationEvent>()
 
+    suspend fun login(email: String, password: String): ApiResponse {
+        return try {
+            val body: Auth.DefaultResponse = BackendService.getClient().login(Auth.LoginBody(email, password))
+
+            ApiResponse(success = true, data = body.data!!)
+        } catch(e: java.lang.Exception) {
+            ApiResponse(success = false, message = "Ocurrió un error. Intente más tarde")
+        }
+    }
     fun onEvent(event: LoginEvent) {
         when (event) {
             is LoginEvent.UpdateEmail -> {

@@ -1,6 +1,7 @@
 package com.example.testapp.screens
 
 import android.annotation.SuppressLint
+import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -15,14 +16,23 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.testapp.dataStore
+import com.example.testapp.models.ApiResponse
+import com.example.testapp.models.Auth
 import com.example.testapp.validations.ValidationEvent
 import com.example.testapp.viewModels.LoginEvent
 import com.example.testapp.viewModels.LoginViewModel
@@ -34,10 +44,13 @@ fun LoginScreen(navController: NavController) {
     val loginViewModel: LoginViewModel = viewModel()
 
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     val stateForm = loginViewModel.uiState.value
     var isValidForm by remember { mutableStateOf(false) }
     var hidePassword by remember { mutableStateOf(true) }
+
+
 
     scope.launch {
         loginViewModel.validationEvent.collect { event->
@@ -131,7 +144,18 @@ fun LoginScreen(navController: NavController) {
             Button(
                 modifier = Modifier.padding(bottom = 20.dp),
                 enabled = isValidForm,
-                onClick = { navController.navigate("home") }
+                onClick = {
+                    scope.launch {
+                        val response: ApiResponse = loginViewModel.login(stateForm.email, stateForm.password)
+
+                        if (response.success) {
+                            val body = response.data as Auth.Data
+                            context.dataStore.edit { settings ->
+                                settings[stringPreferencesKey("authToken")] = body.token
+                            }
+                        }
+                    }
+                }
             ) {
                 Text(text = "Iniciar sesion")
             }

@@ -12,15 +12,22 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.navigation.NavController
 import com.example.testapp.components.dialogs.CreateTaskDialog
+import com.example.testapp.dataStore
 import com.example.testapp.models.Task
 import com.example.testapp.viewModels.TasksViewModel
+import kotlinx.coroutines.launch
 
 @SuppressLint("UnrememberedMutableState", "UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun HomeScreen(navController: NavController) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val tasksViewModel by remember { mutableStateOf(TasksViewModel()) }
     val tasks by remember { mutableStateOf(tasksViewModel.getTasks()) }
     val openDialog = remember { mutableStateOf(false) }
@@ -45,7 +52,11 @@ fun HomeScreen(navController: NavController) {
                         DropdownMenuItem(
                             onClick = {
                                 expanded = false
-                                navController.navigate("login")
+                                scope.launch {
+                                    context.dataStore.edit { settings ->
+                                        settings.remove(stringPreferencesKey("authToken"))
+                                    }
+                                }
                             }
                         ) {
                             Text(text = "Cerrar sesión")
