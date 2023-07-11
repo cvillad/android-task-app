@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -66,42 +67,66 @@ fun LoginScreen(navController: NavController) {
                 style = MaterialTheme.typography.h4
             )
 
-            TextField(
+            Column(
                 modifier = Modifier.padding(bottom = 20.dp),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Email,
-                    imeAction = ImeAction.Next
-                ),
-                value = stateForm.email,
-                label = { Text(text = "Correo electrónico") },
-                onValueChange = {
-                    loginViewModel.onEvent(LoginEvent.UpdateEmail(it))
-                },
-                singleLine = true,
-            )
-
-            TextField(
-                modifier = Modifier.padding(bottom = 20.dp),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType =  KeyboardType.Password,
-                    imeAction = ImeAction.Done
-                ),
-                keyboardActions = KeyboardActions { focusManager.clearFocus() },
-                value = stateForm.password,
-                onValueChange = {
-                    loginViewModel.onEvent(LoginEvent.UpdatePassword(it))
-                },
-                label = { Text(text = "Contraseña") },
-                trailingIcon = {
-                    Icon(
-                        modifier = Modifier.clickable { hidePassword = !hidePassword },
-                        imageVector = if (hidePassword) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                        contentDescription = "Toggle visibility"
+            ) {
+                TextField(
+                    modifier = Modifier.padding(bottom = 4.dp),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Email,
+                        imeAction = ImeAction.Next
+                    ),
+                    value = stateForm.email,
+                    label = { Text(text = "Correo electrónico") },
+                    onValueChange = {
+                        loginViewModel.onEvent(LoginEvent.UpdateEmail(it))
+                    },
+                    singleLine = true,
+                    isError = stateForm.hasEmailError
+                )
+                if (stateForm.hasEmailError) {
+                    Text(
+                        text = "Ingrese un email válido",
+                        style = MaterialTheme.typography.caption,
+                        color = Color.Red
                     )
-                },
-                visualTransformation = if (hidePassword) PasswordVisualTransformation() else VisualTransformation.None,
-                singleLine = true
-            )
+                }
+            }
+
+            Column(
+                modifier = Modifier.padding(bottom = 20.dp),
+            ) {
+                TextField(
+                    modifier = Modifier.padding(bottom = 4.dp),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType =  KeyboardType.Password,
+                        imeAction = ImeAction.Done
+                    ),
+                    keyboardActions = KeyboardActions { focusManager.clearFocus() },
+                    value = stateForm.password,
+                    onValueChange = {
+                        loginViewModel.onEvent(LoginEvent.UpdatePassword(it))
+                    },
+                    label = { Text(text = "Contraseña") },
+                    trailingIcon = {
+                        Icon(
+                            modifier = Modifier.clickable { hidePassword = !hidePassword },
+                            imageVector = if (hidePassword) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                            contentDescription = "Toggle visibility"
+                        )
+                    },
+                    visualTransformation = if (hidePassword) PasswordVisualTransformation() else VisualTransformation.None,
+                    singleLine = true,
+                    isError = stateForm.hasPasswordError
+                )
+                if (stateForm.hasPasswordError) {
+                    Text(
+                        text = "La contraseña debe contener más de 7 caracteres",
+                        style = MaterialTheme.typography.caption,
+                        color = Color.Red
+                    )
+                }
+            }
 
             Button(
                 modifier = Modifier.padding(bottom = 20.dp),
