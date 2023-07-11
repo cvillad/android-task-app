@@ -78,7 +78,7 @@ fun LoginScreen(navController: NavController) {
 
             Button(
                 modifier = Modifier.padding(bottom = 20.dp),
-                onClick = { /*TODO*/ }
+                onClick = { navController.navigate("home") }
             ) {
                 Text(text = "Iniciar sesion")
             }
