@@ -6,7 +6,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,6 +24,7 @@ fun HomeScreen(navController: NavController) {
     val tasksViewModel by remember { mutableStateOf(TasksViewModel()) }
     val tasks by remember { mutableStateOf(tasksViewModel.getTasks()) }
     val openDialog = remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(false) }
 
     LaunchedEffect(null) {
         tasksViewModel.addTask(Task(description = "First task"))
@@ -30,9 +33,26 @@ fun HomeScreen(navController: NavController) {
 
     Scaffold(
         topBar = {
-            TopAppBar() {
-                Text(text = "Todo List")
-            }
+            TopAppBar(
+                title = {
+                    Text(text = "Todo app")
+                },
+                actions = {
+                    IconButton(onClick = { expanded = true }) {
+                        Icon(imageVector = Icons.Default.AccountCircle, contentDescription = "Menu icon")
+                    }
+                    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                        DropdownMenuItem(
+                            onClick = {
+                                expanded = false
+                                navController.navigate("login")
+                            }
+                        ) {
+                            Text(text = "Cerrar sesión")
+                        }
+                    }
+                }
+            )
         },
         floatingActionButton = {
             if (openDialog.value) {

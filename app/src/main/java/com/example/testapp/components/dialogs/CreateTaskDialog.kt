@@ -8,6 +8,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.testapp.models.Task
@@ -18,7 +19,7 @@ fun CreateTaskDialog(
     openDialog: MutableState<Boolean>,
     tasksViewModel: TasksViewModel = viewModel(),
 ) {
-    var description by remember { mutableStateOf("") }
+    var description by remember { mutableStateOf(TextFieldValue("")) }
 
     AlertDialog(
         onDismissRequest = { openDialog.value = false },
@@ -32,8 +33,8 @@ fun CreateTaskDialog(
             ) {
                 TextField(
                     value = description,
-                    onValueChange = { newText ->
-                        description = newText
+                    onValueChange = {
+                        description = it
                     }, modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 20.dp),
@@ -50,7 +51,7 @@ fun CreateTaskDialog(
             Button(
                 onClick = {
                     openDialog.value = false
-                    tasksViewModel.addTask(Task(description = description))
+                    tasksViewModel.addTask(Task(description = description.text))
                 }
             ) {
                 Text(text = "Crear")
