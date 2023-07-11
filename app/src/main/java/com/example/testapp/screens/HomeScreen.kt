@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.testapp.components.dialogs.CreateTaskDialog
 import com.example.testapp.models.Task
 import com.example.testapp.viewModels.TasksViewModel
 
@@ -20,6 +21,7 @@ import com.example.testapp.viewModels.TasksViewModel
 fun HomeScreen(navController: NavController) {
     val tasksViewModel by remember { mutableStateOf(TasksViewModel()) }
     val tasks by remember { mutableStateOf(tasksViewModel.getTasks()) }
+    val openDialog = remember { mutableStateOf(false) }
 
     LaunchedEffect(null) {
         tasksViewModel.addTask(Task(description = "First task"))
@@ -33,7 +35,10 @@ fun HomeScreen(navController: NavController) {
             }
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { /*TODO*/ }) {
+            if (openDialog.value) {
+                CreateTaskDialog(openDialog = openDialog, tasksViewModel = tasksViewModel)
+            }
+            FloatingActionButton(onClick = { openDialog.value = true }) {
                 Icon(
                     imageVector = Icons.Filled.Add,
                     contentDescription = "TODO item Add",
