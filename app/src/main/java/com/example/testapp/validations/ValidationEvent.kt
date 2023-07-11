@@ -1,4 +1,4 @@
-package com.example.testapp.viewModels
+package com.example.testapp.validations
 
 sealed class ValidationEvent {
     object Success: ValidationEvent()

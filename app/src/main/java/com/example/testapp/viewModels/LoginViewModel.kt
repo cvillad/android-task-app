@@ -3,7 +3,11 @@ package com.example.testapp.viewModels
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.testapp.validations.ValidationEvent
+import com.example.testapp.validations.Validator
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.launch
 
 data class LoginState(
     val email: String = "",
@@ -36,7 +40,30 @@ class LoginViewModel: ViewModel() {
                     password = event.password
                 )
             }
-            else -> {}
+            is LoginEvent.ValidateFields -> {
+                validateInputs()
+            }
+        }
+    }
+
+    private fun validateInputs() {
+        val emailResult = Validator.validateEmail(_uiState.value.email)
+        val passwordResult = Validator.validateLength(_uiState.value.password)
+
+        val hasError = listOf(
+            emailResult,
+            passwordResult
+        ).any { !it.status }
+
+        _uiState.value = _uiState.value.copy(
+            hasEmailError = !emailResult.status,
+            hasPasswordError = !passwordResult.status
+        )
+
+        viewModelScope.launch {
+            if (hasError) {
+                validationEvent.emit(ValidationEvent.Failed)
+            } else validationEvent.emit(ValidationEvent.Success)
         }
     }
 }
