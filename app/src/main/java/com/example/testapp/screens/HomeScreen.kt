@@ -8,7 +8,6 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,10 +15,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.testapp.components.dialogs.CreateTaskDialog
 import com.example.testapp.dataStore
-import com.example.testapp.models.Task
 import com.example.testapp.viewModels.TasksViewModel
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -31,8 +30,8 @@ import kotlinx.coroutines.launch
 fun HomeScreen(navController: NavController) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val tasksViewModel by remember { mutableStateOf(TasksViewModel()) }
-    var tasks by remember { mutableStateOf<List<Task>?>(null) }
+    val tasksViewModel: TasksViewModel = viewModel()
+    val todoList = tasksViewModel.todoList.value
     val openDialog = remember { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(false) }
     val authToken = context.dataStore.data.map { settings ->
@@ -41,7 +40,7 @@ fun HomeScreen(navController: NavController) {
 
     LaunchedEffect(authToken) {
         authToken?.let {
-            tasks = tasksViewModel.getTasks(authToken)
+            tasksViewModel.getTasks(authToken)
         }
     }
 
@@ -91,7 +90,7 @@ fun HomeScreen(navController: NavController) {
                     .verticalScroll(rememberScrollState())
                     .padding(horizontal = 20.dp, vertical = 30.dp)
             ) {
-                tasks?.forEach {task->
+                todoList.forEach { task->
                     Row (
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically

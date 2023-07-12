@@ -1,13 +1,20 @@
 package com.example.testapp.models
 
-import java.util.*
-
-
 data class GetTasksResponse(
     val success: Boolean,
     val data: List<Task>,
 )
-data class TaskBody(
+
+data class TaskDefaultResponse(
+    val success: Boolean,
+    val data: Task,
+)
+
+data class CreateTaskBody(
+    val description: String,
+)
+
+data class CompleteTaskBody(
     val completed: Boolean
 )
 data class Task(

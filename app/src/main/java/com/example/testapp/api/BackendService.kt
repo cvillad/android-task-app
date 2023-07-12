@@ -1,10 +1,6 @@
 package com.example.testapp.api
 
-import com.example.testapp.models.Auth
-import com.example.testapp.models.GetTasksResponse
-import com.example.testapp.models.Task
-import com.example.testapp.models.TaskBody
-import okhttp3.Interceptor
+import com.example.testapp.models.*
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -19,12 +15,18 @@ interface BackendService {
     @POST("users/login")
     suspend fun login(@Body user: Auth.LoginBody): Auth.DefaultResponse
 
+    @POST("tasks")
+    suspend fun createTask(
+        @Header("authorization") authorization: String,
+        @Body task: CreateTaskBody
+    ): TaskDefaultResponse
+
     @PATCH("tasks/{id}")
     suspend fun updateTask(
         @Header("authorization") authorization: String,
         @Path("id") id: String,
-        @Body task: TaskBody
-    ): Task
+        @Body task: CompleteTaskBody
+    ): TaskDefaultResponse
 
     @GET("tasks")
     suspend fun fetchTasks(@Header("authorization") authorization: String,): GetTasksResponse
@@ -38,12 +40,12 @@ interface BackendService {
                 return client!!
             }
             val requestClient = OkHttpClient.Builder().apply {
-                addInterceptor(Interceptor { chain ->
+                addInterceptor { chain ->
                     val builder = chain.request().newBuilder()
                         .addHeader("Content-Type", "application/json")
                         .build()
                     chain.proceed(builder)
-                })
+                }
             }.build()
             client = Retrofit.Builder()
                     .baseUrl(baseUrl)
