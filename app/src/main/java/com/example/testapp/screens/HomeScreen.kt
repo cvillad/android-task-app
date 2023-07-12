@@ -21,21 +21,28 @@ import com.example.testapp.components.dialogs.CreateTaskDialog
 import com.example.testapp.dataStore
 import com.example.testapp.models.Task
 import com.example.testapp.viewModels.TasksViewModel
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
-@SuppressLint("UnrememberedMutableState", "UnusedMaterialScaffoldPaddingParameter")
+@SuppressLint("UnrememberedMutableState", "UnusedMaterialScaffoldPaddingParameter",
+    "FlowOperatorInvokedInComposition"
+)
 @Composable
 fun HomeScreen(navController: NavController) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val tasksViewModel by remember { mutableStateOf(TasksViewModel()) }
-    val tasks by remember { mutableStateOf(tasksViewModel.getTasks()) }
+    var tasks by remember { mutableStateOf<List<Task>?>(null) }
     val openDialog = remember { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(false) }
+    val authToken = context.dataStore.data.map { settings ->
+        settings[stringPreferencesKey("authToken")]
+    }.collectAsState(initial = null).value
 
-    LaunchedEffect(null) {
-        tasksViewModel.addTask(Task(description = "First task"))
-        tasksViewModel.addTask(Task(description = "Final task"))
+    LaunchedEffect(authToken) {
+        authToken?.let {
+            tasks = tasksViewModel.getTasks(authToken)
+        }
     }
 
     Scaffold(
@@ -84,7 +91,7 @@ fun HomeScreen(navController: NavController) {
                     .verticalScroll(rememberScrollState())
                     .padding(horizontal = 20.dp, vertical = 30.dp)
             ) {
-                tasks.forEach {task->
+                tasks?.forEach {task->
                     Row (
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
@@ -92,7 +99,10 @@ fun HomeScreen(navController: NavController) {
                         Checkbox(
                             checked = task.completed,
                             onCheckedChange = {
-                                tasksViewModel.markAsComplete(task, it)
+                                scope.launch {
+                                    tasksViewModel.markAsComplete(authToken!!, task, it)
+                                }
+
                             }
                         )
                         Text(text = task.description)
